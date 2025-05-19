@@ -7,11 +7,11 @@ wget https://raw.githubusercontent.com/88n77/Logo-88n77/main/logo.sh
 chmod +x logo.sh
 ./logo.sh
 
-setup_url=""
-update_url=""
-delete_url=""
-role_url=""
-validator_url=""
+setup_url="https://raw.githubusercontent.com/88n77/Aztec/main/setup.sh"
+update_url="https://raw.githubusercontent.com/88n77/Aztec/main/update.sh"
+delete_url="https://raw.githubusercontent.com/88n77/Aztec/main/deleted.sh"
+role_url="https://raw.githubusercontent.com/88n77/Aztec/main/role.sh"
+validator_url="https://raw.githubusercontent.com/88n77/Aztec/main/validator.sh"
 
 menu_options=("Встановити" "Оновити" "Видалити" "Отримати роль" "Реєстрація валідатора" "Вийти")
 PS3='Оберіть дію: '
