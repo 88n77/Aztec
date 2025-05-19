@@ -31,6 +31,13 @@ else
   sudo chmod 666 /var/run/docker.sock
 fi
 
+# Якщо контейнер існує, зупинити і видалити його
+if [ "$(docker ps -aq -f name=aztec-sequencer)" ]; then
+  echo "Зупинка і видалення існуючого контейнера aztec-sequencer..."
+  docker stop aztec-sequencer
+  docker rm aztec-sequencer
+fi
+
 echo -e "${green}Налаштування iptables...${nc}"
 if ! command -v iptables &> /dev/null; then
   sudo apt-get update -y
