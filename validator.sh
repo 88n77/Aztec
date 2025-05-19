@@ -1,0 +1,48 @@
+green='\033[0;32m'
+yellow='\033[0;33m'
+red='\033[0;33m'
+nc='\033[0m'
+
+tmpf=$(mktemp) && \
+cat > "$tmpf" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+# 1) Підвантажуємо файл з ключами/параметрами
+VARS_FILE="$HOME/aztec-sequencer/.evm"
+if [ -f "$VARS_FILE" ]; then
+  export $(grep -v '^\s*#' "$VARS_FILE" | xargs)
+fi
+
+RED='\033[0;31m'
+NC='\033[0m'
+
+# 2) Збираємо вивід команди
+output=$(docker exec -i aztec-sequencer \
+  sh -c 'node /usr/src/yarn-project/aztec/dest/bin/index.js add-l1-validator \
+    --l1-rpc-urls "'"${ETHEREUM_HOSTS}"'" \
+    --private-key "'"${VALIDATOR_PRIVATE_KEY}"'" \
+    --attester "'"${WALLET}"'" \
+    --proposer-eoa "'"${WALLET}"'" \
+    --staking-asset-handler 0xF739D03e98e23A7B65940848aBA8921fF3bAc4b2 \
+    --l1-chain-id 11155111' 2>&1) || true
+
+# 3) Обробляємо помилку квоти
+if printf '%s\n' "$output" | grep -q 'ValidatorQuotaFilledUntil'; then
+  ts=$(printf '%s\n' "$output" | grep -oP '\(\K[0-9]+(?=\))' | head -n1)
+  now=$(date +%s)
+  delta=$(( ts - now ))
+  hours=$(( delta / 3600 ))
+  mins=$(( (delta % 3600) / 60 ))
+  printf "${RED}На даний момент перевищена квота реєстрації валідаторів,\n"
+  printf "ви зможете спробувати зареєструватись через %d год %d хв.${NC}\n" \
+         "$hours" "$mins"
+else
+  # інакше просто виводимо оригінальний лог
+  printf '%s\n' "$output"
+fi
+EOF
+
+bash "$tmpf" && \
+rm -f "$tmpf"
+;;
