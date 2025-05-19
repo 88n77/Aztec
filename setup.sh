@@ -71,6 +71,20 @@ P2P_IP=$SERVER_IP
 WALLET=$WALLET
 EOF
 
+docker stop aztec-sequencer
+docker rm aztec-sequencer
+docker run -d \
+  --name aztec-sequencer \
+  --network host \
+  --env-file "$HOME/aztec-sequencer/.evm" \
+  -e DATA_DIRECTORY=/data \
+  -e LOG_LEVEL=debug \
+  -v "$HOME/my-node/node":/data \
+  aztecprotocol/aztec:0.85.0-alpha-testnet.8 \
+  sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js \
+    start --network alpha-testnet --node --archiver --sequencer'
+docker logs --tail 100 -f aztec-sequencer
+
 echo -e "${green}Запуск контейнера з Aztec нодою...${nc}"
 docker run -d \
   --name aztec-sequencer \
